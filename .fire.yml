@@ -1,0 +1,38 @@
+version: 2
+
+pipeline:
+  steps:
+    - step:
+        phase: install
+        image: node:8
+        name: setup
+        configure:
+          # Install Chrome to the base docker image to allow selenium tests
+          - echo "deb http://dl.google.com/linux/chrome/deb/ stable main" | tee -a /etc/apt/sources.list
+          - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+          - apt-get -qq update -y
+          - apt-get -qq install -y google-chrome-stable xvfb gtk2-engines-pixbuf xfonts-cyrillic xfonts-100dpi xfonts-75dpi xfonts-base xfonts-scalable imagemagick x11-apps default-jre
+          - Xvfb :0 -ac -screen 0 1024x768x24 &
+          - export DISPLAY=:99
+          # Code coverage
+          - npm i -g codecov
+        cache: 
+          - package.json
+          - package-lock.json
+        commands:
+          - npm i
+
+    - step:
+        phase: test
+        name: test
+        commands:
+          - npm run test
+	  # TODO This token needs to be replaced with the one for uport-project/uport-connect
+          - codecov --token=bddf3d08-0cb1-4256-bc93-c75c18cb048c
+
+    - step:
+        phase: build
+        name: dist
+        commands:
+          - npm run build:dist
+          - npm run build:dist:prod

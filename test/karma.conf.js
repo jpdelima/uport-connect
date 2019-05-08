@@ -1,7 +1,13 @@
 module.exports = function (config) {
   config.set({
     basePath: '',
-    browsers: ['Chrome'],
+    browsers: ['ChromeHeadlessNoSandbox'],
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
     frameworks: [ 'mocha', 'chai' ],
     files: ['./Connect.js', './UportSubprovider.js', '../src/*.js'],
     preprocessors: {
